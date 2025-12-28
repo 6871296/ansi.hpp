@@ -1,5 +1,7 @@
 #include <string>
 #include <iostream>
+#include <utility>
+#include "buf-istream.hpp"
 using namespace std;
 
 class CLASS_ANSI_SUPPORT_LEVEL
@@ -257,9 +259,34 @@ class ansi_show_cursor : public ansi_temp
 public:
 	ansi_show_cursor() { ansi = "\033[?25h"; }
 };
+pair<int,int> ansi_cursor_pos_get(){
+	cout<<"\033[6n";
+	char c;
+	queue<char> q;
+	string s;
+	while(c!='\033'){//前内容处理
+		std::bcin.getc(c);
+		q.push(c);
+	}
+	while(c!='R'){//ANSI正文读取
+		std::bcin.getc(c);
+		s+=c;
+	}
+	while(!std::bcin.buf.empty()){//后内容处理
+		std::bcin.getc(c);
+		q.push(c);
+	}
+	while(!q.empty()){//数据放回
+		std::bcin.buf.push_back(q.front());
+		q.pop();
+	}
+	const int x = stoi(s.substr(2,s.find(';')-2));
+	const int y = stoi(s.substr(s.find(';')+1,s.length()-1));
+	return make_pair(x,y);
+}
 namespace std::ansi
 {
-	CLASS_ANSI_SUPPORT_LEVEL ANSI_SUPPORT_LEVEL = supportLevel; // 0:Unsupported, 1:Fix-supported, 2:Supported
+	CLASS_ANSI_SUPPORT_LEVEL ANSI_SUPPORT_LEVEL = supportLevel;
 	ansi_reset reset;
 	ansi_bold bold;
 	ansi_lite lite;
@@ -270,8 +297,10 @@ namespace std::ansi
 	ansi_reverse reverse;
 	ansi_conceal conceal;
 	ansi_strike strike;
-	ansi_fg& fg(int n=2){ return *(new ansi_fg(n)); }
-	ansi_bg& bg(int n=2){ return *(new ansi_bg(n)); }
+	ansi_fg& fg(uint8_t c){ return *(new ansi_fg(c)); }
+	ansi_fg& fg(uint8_t r, uint8_t g, uint8_t b){ return *(new ansi_fg(r, g, b)); }
+	ansi_bg& bg(uint8_t c){ return *(new ansi_bg(c)); }
+	ansi_bg& bg(uint8_t r, uint8_t g, uint8_t b){ return *(new ansi_bg(r, g, b)); }
 	ansi_cursor_pos& cursor_pos(int x, int y) {return *(new ansi_cursor_pos(x, y));}
 	ansi_cursor_up cursor_up;
 	ansi_cursor_down cursor_down;
@@ -279,10 +308,12 @@ namespace std::ansi
 	ansi_cursor_right cursor_right;
 	ansi_cursor_save cursor_save;
 	ansi_cursor_restore cursor_restore;
-	ansi_clear clear;
-	ansi_clear_line clear_line;
+	pair<int,int> cursor_pos_get(){ return ansi_cursor_pos_get(); }
+	ansi_clear& clear(int n=2) { return *(new ansi_clear(n)); }
+	ansi_clear_line& clear_line(int n=2) { return *(new ansi_clear_line(n)); }
 	ansi_chace_swap chace_swap;
 	ansi_chace_restore chace_restore;
 	ansi_hide_cursor hide_cursor;
 	ansi_show_cursor show_cursor;
+
 }

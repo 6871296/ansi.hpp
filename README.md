@@ -6,6 +6,8 @@
 
 ANSI转义码已经被广泛使用，但其相当复杂，且C/C++还没有只简化ANSI转义码的头文件，一般都需要系统API，所以写了这个头文件。
 ## 为什么是`ansi.hpp`?
+首先，`ansi.hpp`是目前唯一能实现ANSI读取转义符而不使用系统API的头文件，为开发者节省了大量理解代码的时间。
+
 与ANSI列个表对比一下。未全部列出。
 
 |ANSI功能                 |`ansi.hpp`功能|说明       |
@@ -46,7 +48,8 @@ ANSI转义码已经被广泛使用，但其相当复杂，且C/C++还没有只�
 | `chace_restore` | 切换回主屏幕缓冲区 |
 | `hide_cursor` | 隐藏光标 |
 | `show_cursor` | 显示光标 |
-之后会补充ANSI的读取类功能（这在C++界可是史无前例的！）
+| `pair<int,int>cursor_pos_get()`|读取鼠标指针位置
+之后会补充ANSI的更多读取类功能（这在C++界可是史无前例的！）
 ### 关于级别检测
 `ANSI_SUPPORT_LEVEL`的值可能有以下三种：
 ```cpp
@@ -63,7 +66,9 @@ namespace std::ansi::ANSI_SUPPORT_LEVELS
 
 ANSI is now widely used, but it's very complicated, and C/C++ does not currently have any header that just simplifies ANSI(Many of them still needs system API), so i've written this header file.
 ## Why `ansi.hpp`?
-Here's a compare with ANSI. Not all of them.
+For a start, as far as i know, `ansi.hpp` is currently the only header that able to use the get methods in ANSI without system API.
+
+And, here's a comparing sheet with ANSI. Not all of them.
 
 |ANSI function           |`ansi.hpp`function|info       |
 |------------------------|------------------|----------|
